@@ -44,7 +44,6 @@ public class BaseTest {
     @Order(2)
     @DisplayName("Проверка пагинации")
     public void checkPagination() {
-        performSearch();
         navigateToPage();
         ElementsCollection pageResults = getSearchResults();
         verifySearchResults(pageResults, "второй");
@@ -57,7 +56,6 @@ public class BaseTest {
     @Order(3)
     @DisplayName("Проверка вкладки 'Картинки'")
     public void testImagesTab() {
-        performSearch();
         switchToTab();
         verifyImages();
     }
@@ -69,7 +67,6 @@ public class BaseTest {
     @Order(4)
     @DisplayName("Проверка основных элементов на странице результатов поиска")
     public void checkPageElements() {
-        performSearch();
         verifySearchButton();
         verifyNavigationBlock();
         verifySettingsMenu();
