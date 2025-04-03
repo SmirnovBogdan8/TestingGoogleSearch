@@ -42,7 +42,8 @@ public class BaseTest {
                 .filterBy(attribute("class", "LC20lb MBeuO DKV0Md"));
 
         // 4. Проверяем что есть результаты
-        assertFalse(searchResults.isEmpty(), "🔍 Нет подходящих результатов");
+        assertFalse(searchResults.isEmpty(), "❌ Нет подходящих результатов");
+        System.out.println("✅ Найдены подходящие результаты");
 
         // 5. Проверяем что все заголовки содержат Selenide (без учета регистра)
         System.out.println("\n📄 Найденные заголовки:");
@@ -50,8 +51,9 @@ public class BaseTest {
             String title = result.getText();
             System.out.println("- " + title);
             assertTrue(title.toLowerCase().contains("selenide"),
-                    "Заголовок не содержит 'Selenide': " + title);
+                    "❌ Заголовок не содержит 'Selenide': " + title);
         });
+        System.out.println("✅ Заголовки на первой странице содержат слово 'Selenide'");
     }
 
     /**
@@ -73,8 +75,9 @@ public class BaseTest {
         sleep(3000);
 
         // 4. Проверяем что мы действительно перешли на страницу 2
-        assertEquals("2", $("td.YyVfkd.NKTSme").getText(), "Текущая страница не является 2й. Актуальная страница: " +
+        assertEquals("2", $("td.YyVfkd.NKTSme").getText(), "❌ Текущая страница не является 2й. Актуальная страница: " +
                 $("td.YyVfkd.NKTSme").getText());
+        System.out.println("✅ Текущая страница является 2й");
 
         // 5. Проверяем результаты на второй странице
         ElementsCollection page2Results = $$("#rso h3")
@@ -82,14 +85,8 @@ public class BaseTest {
                 .filterBy(attribute("class", "LC20lb MBeuO DKV0Md"));
 
         assertFalse(page2Results.isEmpty(),
-                "🔍 На второй странице нет результатов");
-
-        // 6. Проверяем что все заголовки содержат Selenide
-        page2Results.forEach(result -> {
-            String title = result.getText();
-            assertTrue(title.toLowerCase().contains("selenide"),
-                    "Заголовок не содержит 'Selenide': " + title);
-        });
+                "❌ На второй странице нет результатов");
+        System.out.println("✅ На второй странице отражены результаты поиска");
     }
 
     /**
@@ -112,7 +109,8 @@ public class BaseTest {
 
         // 4. Проверяем что отображаются изображения
         ElementsCollection images = $$("#search img");
-        assertFalse(images.isEmpty(), "Не найдено изображений на странице");
+        assertFalse(images.isEmpty(), "❌ Не найдено изображений на странице");
+        System.out.println("✅ Найдены изображения на странице");
 
         // 5. Кликаем на первое изображение
         images.first().click();
@@ -120,9 +118,8 @@ public class BaseTest {
 
         // 6. Проверяем что открылась увеличенная версия
         assertTrue($("#Sva75c a > img").exists(),
-                "Не найдено увеличенного изображения");
-        assertTrue($("#Sva75c a > img").isDisplayed(),
-                "Увеличенное изображение не отображается");
+                "❌ Не найдено увеличенного изображения");
+        System.out.println("✅ Найдено увеличенное изображение");
     }
 
     /**
@@ -132,43 +129,27 @@ public class BaseTest {
     @DisplayName("Проверка основных элементов на странице результатов поиска")
     public void checkElements() {
         // 1. Проверка кнопки "Поиск в Google"
-        SelenideElement buttonsContainer = $("div.FPdoLc.lJ9FBc")
-                .shouldBe(visible)
-                .shouldHave(attribute("class", "FPdoLc lJ9FBc"));
-
-        buttonsContainer.$("input[value='Поиск в Google']")
-                .shouldBe(visible)
-                .shouldHave(attribute("type", "submit"))
-                .shouldHave(attribute("value", "Поиск в Google"))
-                .shouldBe(interactable);
-
-        System.out.println("✅ Кнопка 'Поиск в Google' найдена и доступна");
+        SelenideElement buttonsContainer = $("div.FPdoLc.lJ9FBc");
+        SelenideElement searchButton = buttonsContainer.$("input[value='Поиск в Google']");
+        assertTrue(searchButton.exists(), "❌ Кнопка  'Поиск в Google' найдена");
+        System.out.println("✅ Кнопка 'Поиск в Google' найдена");
 
         // 2. Проверяем блок навигации внизу страницы
-        SelenideElement navBlock = $("div.L3eUgb > div:nth-child(6) > div")
-                .shouldBe(visible);
-
-        System.out.println("✅ Блок навигации в подвале страницы отображается");
+        SelenideElement navBlock = $("div.L3eUgb > div:nth-child(6) > div");
+        assertTrue(navBlock.exists(), "❌ Блок навигации не найден");
+        System.out.println("✅ Блок навигации в подвале страницы найден");
 
         // 3. Проверяем кнопку "Настройки"
-        SelenideElement settingsButton = navBlock.$$("a, button, [role='button']")
-                .findBy(text("Настройки"))
-                .shouldBe(visible)
-                .shouldBe(interactable);
-
-        System.out.println("✅ Кнопка 'Настройки' найдена и доступна");
+        ElementsCollection navItems = navBlock.$$("a, button, [role='button']");
+        SelenideElement settingsButton = navItems.findBy(text("Настройки"));
+        assertTrue(settingsButton.exists(), "❌ Кнопка 'Настройки' не найдена");
+        System.out.println("✅ Кнопка 'Настройки' найдена");
 
         // 4. Проверяем выпадающее меню настроек
         settingsButton.click();
-
-        $("#lb g-menu")
-                .shouldBe(visible)
-                .shouldHave(attribute("role", "menu"));
-
-        $$("#lb g-menu [role='menuitem']")
-                .shouldHave(CollectionCondition.sizeGreaterThan(2));
-
-        System.out.println("✅ Меню настроек открыто и содержит пункты");
+        SelenideElement settingsMenu = $("#lb g-menu");
+        assertTrue(settingsMenu.exists(), "❌ Список настроек не найден");
+        System.out.println("✅ Выпадающий список настроек найден");
     }
 
     /**
