@@ -5,10 +5,12 @@ import org.junit.jupiter.api.*;
 import java.time.Duration;
 
 import static com.codeborne.selenide.CollectionCondition.sizeGreaterThanOrEqual;
-import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("Проверка функционала поисковой системы Google")
 public class BaseTest {
     /**
      *
@@ -22,49 +24,34 @@ public class BaseTest {
      *
      */
     @Test
+    @DisplayName("Проверка результатов поиска Google")
     public void searchAutomation() {
+        // 1. Выполняем поиск
         $("#APjFqb").setValue("Selenide").pressEnter();
         sleep(5000);
-        boolean captchaShown = false;
-        boolean captchaPassed = false;
-        int maxAttempts = 10;
-        int attempt = 0;
 
-        while (attempt < maxAttempts && !captchaPassed) {
-            attempt++;
+        // 2. Проверяем и обрабатываем капчу
+        assertTrue(checkAndHandleCaptcha(),
+                "❌ Капча не пройдена или страница не загрузилась");
 
-            if ($("#captcha-form").exists() || $("iframe[src*='recaptcha']").exists()) {
-                if (!captchaShown) {
-                    System.out.println("⚠ Обнаружена капча! Пожалуйста, пройдите её вручную.");
-                    captchaShown = true;
-                }
-                sleep(5000);
-            }
+        // 3. Получаем отфильтрованные результаты
+        ElementsCollection searchResults = $$("#rso h3")
+                .filter(visible)
+                .filterBy(attribute("class", "LC20lb MBeuO DKV0Md"));
 
-            else if ($("#logo > svg").exists()) {
-                captchaPassed = true;
-                System.out.println("✅ Капча пройдена (или её не было). Продолжаем тест.");
-            }
+        // 4. Проверяем что есть результаты
+        assertFalse(searchResults.isEmpty(), "🔍 Нет подходящих результатов");
 
-            else {
-                System.out.println("⏳ Ожидаем загрузки страницы...");
-                sleep(3000);
-            }
-        }
+        // 5. Проверяем что все заголовки содержат Selenide (без учета регистра)
+        System.out.println("\n📄 Найденные заголовки:");
+        searchResults.forEach(result -> {
+            String title = result.getText();
+            System.out.println("- " + title);
+            assertTrue(title.toLowerCase().contains("selenide"),
+                    "Заголовок не содержит 'Selenide': " + title);
+        });
 
-        if (!captchaPassed) {
-            System.out.println("❌ Не удалось подтвердить прохождение капчи. Тест остановлен.");
-            throw new AssertionError("❌ Капча не пройдена или страница не загрузилась.");
-        }
-
-        // Выводим все заголовки результатов поиска (#rso h3)
-        ElementsCollection searchResults = $$("#rso h3");
-        if (searchResults.isEmpty()) {
-            System.out.println("🔍 Результаты поиска не найдены.");
-        } else {
-            System.out.println("\n📄 Найденные заголовки:");
-            searchResults.forEach(result -> System.out.println("- " + result.getText()));
-        }
+        System.out.println("\n✅ Все заголовки содержат искомое слово");
     }
 
     /**
@@ -97,5 +84,33 @@ public class BaseTest {
     @AfterAll
     public static void tearDown() {
         Selenide.closeWebDriver();
+    }
+
+    private boolean checkAndHandleCaptcha() {
+        boolean captchaShown = false;
+        int maxAttempts = 10;
+        int attempt = 0;
+
+        while (attempt < maxAttempts) {
+            attempt++;
+
+            if ($("#captcha-form").exists() || $("iframe[src*='recaptcha']").exists()) {
+                if (!captchaShown) {
+                    System.out.println("⚠ Обнаружена капча! Пожалуйста, пройдите её вручную.");
+                    captchaShown = true;
+                }
+                sleep(5000);
+            }
+            else if ($("#rso").exists()) {
+                System.out.println("✅ Капча пройдена (или её не было). Страница с результатами поиска загружена.");
+                return true;
+            }
+            else {
+                System.out.println("⏳ Ожидаем загрузки страницы...");
+                sleep(3000);
+            }
+        }
+
+        return false;
     }
 }
