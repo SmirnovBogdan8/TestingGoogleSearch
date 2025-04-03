@@ -1,3 +1,4 @@
+import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import org.junit.jupiter.api.*;
 
@@ -23,29 +24,46 @@ public class BaseTest {
     @Test
     public void searchAutomation() {
         $("#APjFqb").setValue("Selenide").pressEnter();
-
-        // Ожидаем, пока пользователь не пройдет капчу вручную
+        sleep(5000);
+        boolean captchaShown = false;
         boolean captchaPassed = false;
-        while (!captchaPassed) {
-            try {
-                if ($("#logo > svg").exists()) {
-                    captchaPassed = true;
-                    System.out.println("✅ Капча пройдена, продолжаем тест");
-                } else {
-                    System.out.println("⏳ Ожидаем, пока пользователь не пройдет капчу вручную...");
-                    sleep(5000);
+        int maxAttempts = 10;
+        int attempt = 0;
+
+        while (attempt < maxAttempts && !captchaPassed) {
+            attempt++;
+
+            if ($("#captcha-form").exists() || $("iframe[src*='recaptcha']").exists()) {
+                if (!captchaShown) {
+                    System.out.println("⚠ Обнаружена капча! Пожалуйста, пройдите её вручную.");
+                    captchaShown = true;
                 }
-            } catch (Throwable e) {
-                System.out.println("⚠ Возможно, появилась капча. Пожалуйста, пройдите её вручную!");
-                sleep(10000);
+                sleep(5000);
+            }
+
+            else if ($("#logo > svg").exists()) {
+                captchaPassed = true;
+                System.out.println("✅ Капча пройдена (или её не было). Продолжаем тест.");
+            }
+
+            else {
+                System.out.println("⏳ Ожидаем загрузки страницы...");
+                sleep(3000);
             }
         }
 
-        // После прохождения капчи продолжаем проверки
-        if ($("#logo > svg").exists()) {
-            System.out.println("✅ Иконка найдена!");
+        if (!captchaPassed) {
+            System.out.println("❌ Не удалось подтвердить прохождение капчи. Тест остановлен.");
+            throw new AssertionError("❌ Капча не пройдена или страница не загрузилась.");
+        }
+
+        // Выводим все заголовки результатов поиска (#rso h3)
+        ElementsCollection searchResults = $$("#rso h3");
+        if (searchResults.isEmpty()) {
+            System.out.println("🔍 Результаты поиска не найдены.");
         } else {
-            System.out.println("❌ Иконка не найдена!");
+            System.out.println("\n📄 Найденные заголовки:");
+            searchResults.forEach(result -> System.out.println("- " + result.getText()));
         }
     }
 
