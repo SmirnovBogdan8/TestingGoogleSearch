@@ -7,6 +7,10 @@ import org.junit.jupiter.api.*;
 import static com.codeborne.selenide.Selenide.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Базовый тестовый класс для проверки функционала поисковой системы Google.
+ * Содержит набор тестов для проверки основных функций поиска Google.
+ */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Проверка функционала поисковой системы Google")
 public class BaseTest {
@@ -15,6 +19,11 @@ public class BaseTest {
     private static SearchResultsPage searchResultsPage;
     private static ImagesResultsPage imagesResultsPage;
 
+    /**
+     * Инициализация тестового окружения перед всеми тестами.
+     * Создает директорию для скриншотов, открывает главную страницу Google
+     * и инициализирует Page Objects.
+     */
     @BeforeAll
     public static void setUp() {
         GoogleUtils.initScreenshotsDir();
@@ -23,6 +32,13 @@ public class BaseTest {
         imagesResultsPage = new ImagesResultsPage();
     }
 
+    /**
+     * Тест автоматизации поиска в Google.
+     * Проверяет:
+     * 1. Выполнение поискового запроса
+     * 2. Прохождение капчи (если появится)
+     * 3. Наличие заголовков со словом Selenide
+     */
     @Test
     @Order(1)
     @DisplayName("Автоматизация поиска в Google")
@@ -35,6 +51,12 @@ public class BaseTest {
         verifySearchResults(searchResults, "первой");
     }
 
+    /**
+     * Тест проверки пагинации результатов поиска.
+     * Проверяет:
+     * 1. Возможность перехода на вторую страницу результатов
+     * 2. Наличие и корректность результатов на второй странице
+     */
     @Test
     @Order(2)
     @DisplayName("Проверка пагинации")
@@ -44,6 +66,13 @@ public class BaseTest {
         verifySearchResults(pageResults, "второй");
     }
 
+    /**
+     * Тест проверки вкладки "Картинки".
+     * Проверяет:
+     * 1. Переключение на вкладку "Картинки"
+     * 2. Наличие изображений в результатах поиска
+     * 3. Возможность просмотра увеличенного изображения
+     */
     @Test
     @Order(3)
     @DisplayName("Проверка вкладки 'Картинки'")
@@ -52,6 +81,14 @@ public class BaseTest {
         verifyImages();
     }
 
+    /**
+     * Тест проверки основных элементов интерфейса.
+     * Проверяет:
+     * 1. Наличие строки поиска
+     * 2. Наличие кнопки поиска
+     * 3. Наличие блока навигации
+     * 4. Наличие меню настроек
+     */
     @Test
     @Order(4)
     @DisplayName("Проверка основных элементов на странице результатов поиска")
@@ -62,12 +99,23 @@ public class BaseTest {
         verifySettingsMenu();
     }
 
+    /**
+     * Завершающие действия после всех тестов.
+     * Закрывает веб-драйвер.
+     */
     @AfterAll
     public static void tearDown() {
         closeWebDriver();
     }
 
     // ===== Вспомогательные методы проверок =====
+
+    /**
+     * Проверяет результаты поиска.
+     *
+     * @param results коллекция элементов с результатами поиска
+     * @param pageName название страницы (для логирования)
+     */
     private void verifySearchResults(ElementsCollection results, String pageName) {
         assertFalse(results.isEmpty(), "❌ Нет подходящих результатов на " + pageName + " странице");
         GoogleUtils.takeScreenshot("search_results_page_" + pageName);
@@ -82,6 +130,9 @@ public class BaseTest {
         });
     }
 
+    /**
+     * Проверяет функционал работы с изображениями.
+     */
     private void verifyImages() {
         ElementsCollection images = imagesResultsPage.getImages();
         assertFalse(images.isEmpty(), "❌ Не найдено изображений на странице");
@@ -95,6 +146,9 @@ public class BaseTest {
         System.out.println("✅ Найдено увеличенное изображение");
     }
 
+    /**
+     * Проверяет наличие и доступность кнопки поиска.
+     */
     private void verifySearchButton() {
         googleSearchPage.clickLogo();
         assertTrue(googleSearchPage.getSearchButton().exists(),
@@ -103,6 +157,9 @@ public class BaseTest {
         System.out.println("✅ Кнопка 'Поиск в Google' найдена");
     }
 
+    /**
+     * Проверяет наличие блока навигации.
+     */
     private void verifyNavigationBlock() {
         assertTrue(searchResultsPage.getNavigationBlock().exists(),
                 "❌ Блок навигации не найден");
@@ -110,6 +167,9 @@ public class BaseTest {
         System.out.println("✅ Блок навигации в подвале страницы найден");
     }
 
+    /**
+     * Проверяет наличие строки поиска.
+     */
     private void verifySearchInput() {
         assertTrue(googleSearchPage.getSearchInput().exists(),
                 "❌ Строка поиска не найдена");
@@ -117,6 +177,9 @@ public class BaseTest {
         System.out.println("✅ Строка поиска найдена");
     }
 
+    /**
+     * Проверяет работу меню настроек.
+     */
     private void verifySettingsMenu() {
         searchResultsPage.openSettingsMenu();
         assertTrue(searchResultsPage.getSettingsMenu().exists(),

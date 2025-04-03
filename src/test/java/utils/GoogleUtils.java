@@ -9,15 +9,28 @@ import java.nio.file.Files;
 
 import static com.codeborne.selenide.Selenide.$;
 
+/**
+ * Утилитарный класс для работы с Google-страницами.
+ * Содержит методы для работы со скриншотами, ожиданиями и капчей.
+ */
 public class GoogleUtils {
     private static final String SCREENSHOTS_DIR = "build/reports/tests/screenshots/";
     private static final int DEFAULT_WAIT_TIMEOUT = 3000;
 
-    // Работа со скриншотами
+    /**
+     * Инициализирует директорию для сохранения скриншотов.
+     * Создает папку, если она не существует.
+     */
     public static void initScreenshotsDir() {
         new File(SCREENSHOTS_DIR).mkdirs();
     }
 
+    /**
+     * Создает и сохраняет скриншот с заданным именем.
+     *
+     * @param name базовое имя файла скриншота (без расширения)
+     * @throws RuntimeException если не удалось сохранить скриншот
+     */
     public static void takeScreenshot(String name) {
         try {
             File screenshot = Screenshots.takeScreenShotAsFile();
@@ -27,19 +40,34 @@ public class GoogleUtils {
             System.out.println("📸 Скриншот сохранен: " + targetFile.getAbsolutePath());
         } catch (IOException e) {
             System.err.println("⚠ Не удалось сохранить скриншот: " + e.getMessage());
+            throw new RuntimeException("Failed to save screenshot", e);
         }
     }
 
-    // Работа с таймерами
+    /**
+     * Ожидание по умолчанию (3000 мс).
+     * Используется для паузы между действиями.
+     */
     public static void waitDefault() {
         Selenide.sleep(DEFAULT_WAIT_TIMEOUT);
     }
 
+    /**
+     * Ожидание заданное количество миллисекунд.
+     *
+     * @param milliseconds время ожидания в миллисекундах
+     */
     public static void wait(int milliseconds) {
         Selenide.sleep(milliseconds);
     }
 
-    // Работа с капчей
+    /**
+     * Проверяет, пройдена ли капча, и ожидает загрузки страницы с результатами.
+     * Если обнаружена капча, выводит сообщение о необходимости ручного ввода.
+     *
+     * @throws AssertionError если капча не пройдена или страница не загрузилась
+     *                        в течение максимального времени ожидания
+     */
     public static void verifyCaptchaPassed() {
         boolean captchaShown = false;
         int maxAttempts = 10;
