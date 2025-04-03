@@ -1,8 +1,10 @@
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.*;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import static com.codeborne.selenide.CollectionCondition.sizeGreaterThanOrEqual;
 import static com.codeborne.selenide.Condition.*;
@@ -27,7 +29,7 @@ public class BaseTest {
     public void searchAutomation() {
         // 1. Выполняем поиск
         $("#APjFqb").setValue("Selenide").pressEnter();
-        sleep(5000);
+        sleep(3000);
 
         // 2. Проверяем и обрабатываем капчу
         assertTrue(checkAndHandleCaptcha(),
@@ -93,9 +95,33 @@ public class BaseTest {
      *
      */
     @Test
-    @DisplayName("Проверка изображений на странице поиска")
-    public void checkImage() {
+    @DisplayName("Проверка вкладки 'Картинки'")
+    public void testImagesTab() {
+        // 1. Выполняем поиск
+        $("#APjFqb").setValue("Selenide").pressEnter();
+        sleep(3000);
 
+        // 2. Проверяем и обрабатываем капчу
+        assertTrue(checkAndHandleCaptcha(),
+                "❌ Капча не пройдена или страница не загрузилась");
+
+        // 3. Находим и кликаем вкладку "Картинки"
+        $("#hdtb-sc").$$("a").findBy(text("Картинки")).click();
+        sleep(3000);
+
+        // 4. Проверяем что отображаются изображения
+        ElementsCollection images = $$("#search img");
+        assertFalse(images.isEmpty(), "Не найдено изображений на странице");
+
+        // 5. Кликаем на первое изображение
+        images.first().click();
+        sleep(2000);
+
+        // 6. Проверяем что открылась увеличенная версия
+        assertTrue($("#Sva75c a > img").exists(),
+                "Не найдено увеличенного изображения");
+        assertTrue($("#Sva75c a > img").isDisplayed(),
+                "Увеличенное изображение не отображается");
     }
 
     /**
