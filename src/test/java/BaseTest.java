@@ -1,7 +1,12 @@
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import com.codeborne.selenide.Screenshots;
 import org.junit.jupiter.api.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -16,12 +21,14 @@ public class BaseTest {
 
     private static final String SEARCH_QUERY = "Selenide";
     private static final int WAIT_TIMEOUT = 3000;
+    private static final String SCREENSHOTS_DIR = "build/reports/tests/screenshots/";
 
     /**
      * Инициализация тестового окружения
      */
     @BeforeAll
     public static void setUp() {
+        new File(SCREENSHOTS_DIR).mkdirs();
         open("https://www.google.com");
     }
 
@@ -33,6 +40,7 @@ public class BaseTest {
     @DisplayName("Автоматизация поиска в Google")
     public void searchAutomation() {
         performSearch();
+        takeScreenshot("after_search");
         ElementsCollection searchResults = getSearchResults();
         verifySearchResults(searchResults, "первой");
     }
@@ -108,6 +116,7 @@ public class BaseTest {
      */
     private void verifySearchResults(ElementsCollection results, String pageName) {
         assertFalse(results.isEmpty(), "❌ Нет подходящих результатов на " + pageName + " странице");
+        takeScreenshot("search_results_page_" + pageName);
         System.out.println("✅ Найдены подходящие результаты на " + pageName + " странице");
 
         System.out.println("\n📄 Найденные заголовки:");
@@ -133,6 +142,7 @@ public class BaseTest {
     private void verifyImages() {
         ElementsCollection images = $$("#search img");
         assertFalse(images.isEmpty(), "❌ Не найдено изображений на странице");
+        takeScreenshot("images_tab");
         System.out.println("✅ Найдены изображения на странице");
 
         images.first().click();
@@ -140,6 +150,7 @@ public class BaseTest {
 
         assertTrue($("#Sva75c a > img").exists(),
                 "❌ Не найдено увеличенного изображения");
+        takeScreenshot("enlarged_image");
         System.out.println("✅ Найдено увеличенное изображение");
     }
 
@@ -166,6 +177,7 @@ public class BaseTest {
         SelenideElement searchButton = $("div.FPdoLc.lJ9FBc")
                 .$("input[value='Поиск в Google']");
         assertTrue(searchButton.exists(), "❌ Кнопка 'Поиск в Google' не найдена");
+        takeScreenshot("search_button");
         System.out.println("✅ Кнопка 'Поиск в Google' найдена");
     }
 
@@ -175,6 +187,7 @@ public class BaseTest {
     private void verifyNavigationBlock() {
         SelenideElement navBlock = $("div.L3eUgb > div:nth-child(6) > div");
         assertTrue(navBlock.exists(), "❌ Блок навигации не найден");
+        takeScreenshot("navigation_block");
         System.out.println("✅ Блок навигации в подвале страницы найден");
     }
 
@@ -186,10 +199,12 @@ public class BaseTest {
                 .$$("a, button, [role='button']")
                 .findBy(text("Настройки"));
         assertTrue(settingsButton.exists(), "❌ Кнопка 'Настройки' не найдена");
+        takeScreenshot("settings_button");
         System.out.println("✅ Кнопка 'Настройки' найдена");
 
         settingsButton.click();
         assertTrue($("#lb g-menu").exists(), "❌ Список настроек не найден");
+        takeScreenshot("settings_menu_opened");
         System.out.println("✅ Выпадающий список настроек найден");
     }
 
@@ -222,5 +237,20 @@ public class BaseTest {
         }
 
         fail("❌ Капча не пройдена или страница не загрузилась");
+    }
+
+    /**
+     * Создает и сохраняет скриншоты каждой проверки
+     */
+    private void takeScreenshot(String name) {
+        try {
+            File screenshot = Screenshots.takeScreenShotAsFile();
+            File targetFile = new File(SCREENSHOTS_DIR + name + "_" + System.currentTimeMillis() + ".png");
+            assert screenshot != null;
+            Files.copy(screenshot.toPath(), targetFile.toPath());
+            System.out.println("📸 Скриншот сохранен: " + targetFile.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("⚠ Не удалось сохранить скриншот: " + e.getMessage());
+        }
     }
 }
