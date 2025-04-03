@@ -1,3 +1,4 @@
+import com.codeborne.selenide.CollectionCondition;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
@@ -128,9 +129,46 @@ public class BaseTest {
      *
      */
     @Test
-    @DisplayName("Проверка отображения других элементов на странице")
+    @DisplayName("Проверка основных элементов на странице результатов поиска")
     public void checkElements() {
+        // 1. Проверка кнопки "Поиск в Google"
+        SelenideElement buttonsContainer = $("div.FPdoLc.lJ9FBc")
+                .shouldBe(visible)
+                .shouldHave(attribute("class", "FPdoLc lJ9FBc"));
 
+        buttonsContainer.$("input[value='Поиск в Google']")
+                .shouldBe(visible)
+                .shouldHave(attribute("type", "submit"))
+                .shouldHave(attribute("value", "Поиск в Google"))
+                .shouldBe(interactable);
+
+        System.out.println("✅ Кнопка 'Поиск в Google' найдена и доступна");
+
+        // 2. Проверяем блок навигации внизу страницы
+        SelenideElement navBlock = $("div.L3eUgb > div:nth-child(6) > div")
+                .shouldBe(visible);
+
+        System.out.println("✅ Блок навигации в подвале страницы отображается");
+
+        // 3. Проверяем кнопку "Настройки"
+        SelenideElement settingsButton = navBlock.$$("a, button, [role='button']")
+                .findBy(text("Настройки"))
+                .shouldBe(visible)
+                .shouldBe(interactable);
+
+        System.out.println("✅ Кнопка 'Настройки' найдена и доступна");
+
+        // 4. Проверяем выпадающее меню настроек
+        settingsButton.click();
+
+        $("#lb g-menu")
+                .shouldBe(visible)
+                .shouldHave(attribute("role", "menu"));
+
+        $$("#lb g-menu [role='menuitem']")
+                .shouldHave(CollectionCondition.sizeGreaterThan(2));
+
+        System.out.println("✅ Меню настроек открыто и содержит пункты");
     }
 
     /**
