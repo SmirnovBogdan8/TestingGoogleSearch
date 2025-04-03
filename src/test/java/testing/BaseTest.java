@@ -56,6 +56,7 @@ public class BaseTest {
     @Order(4)
     @DisplayName("Проверка основных элементов на странице результатов поиска")
     public void checkPageElements() {
+        verifySearchInput();
         verifySearchButton();
         verifyNavigationBlock();
         verifySettingsMenu();
@@ -107,6 +108,13 @@ public class BaseTest {
                 "❌ Блок навигации не найден");
         GoogleUtils.takeScreenshot("navigation_block");
         System.out.println("✅ Блок навигации в подвале страницы найден");
+    }
+
+    private void verifySearchInput() {
+        assertTrue(googleSearchPage.getSearchInput().exists(),
+                "❌ Строка поиска не найдена");
+        GoogleUtils.takeScreenshot("search_input");
+        System.out.println("✅ Строка поиска найдена");
     }
 
     private void verifySettingsMenu() {

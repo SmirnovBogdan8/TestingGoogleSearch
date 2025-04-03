@@ -2,10 +2,12 @@ package pages;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import utils.GoogleUtils;
+
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.Condition.*;
 
-public class SearchResultsPage extends BasePage {
+public class SearchResultsPage {
     private final SelenideElement navigationBlock = $("div.L3eUgb > div:nth-child(6) > div");
     private final SelenideElement activePageNumber = $("td.YyVfkd.NKTSme");
     private final SelenideElement settingsButton = $("div.L3eUgb > div:nth-child(6) > div")
@@ -23,11 +25,7 @@ public class SearchResultsPage extends BasePage {
         $$("#botstuff a[aria-label='Page " + pageNumber + "']")
                 .findBy(text(String.valueOf(pageNumber)))
                 .click();
-        waitDefault();
-    }
-
-    public SelenideElement getActivePageNumber() {
-        return activePageNumber;
+        GoogleUtils.waitDefault();
     }
 
     public SelenideElement getNavigationBlock() {
