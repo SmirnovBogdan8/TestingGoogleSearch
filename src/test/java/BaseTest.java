@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Тесты для проверки функционала поисковой системы Google
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Проверка функционала поисковой системы Google")
 public class BaseTest {
 
@@ -28,11 +29,11 @@ public class BaseTest {
      * Проверка основного функционала поиска
      */
     @Test
+    @Order(1)
     @DisplayName("Автоматизация поиска в Google")
     public void searchAutomation() {
         performSearch();
         ElementsCollection searchResults = getSearchResults();
-
         verifySearchResults(searchResults, "первой");
     }
 
@@ -40,11 +41,11 @@ public class BaseTest {
      * Проверка пагинации в результатах поиска
      */
     @Test
+    @Order(2)
     @DisplayName("Проверка пагинации")
     public void checkPagination() {
         performSearch();
         navigateToPage();
-
         ElementsCollection pageResults = getSearchResults();
         verifySearchResults(pageResults, "второй");
     }
@@ -53,14 +54,11 @@ public class BaseTest {
      * Проверка вкладки с изображениями
      */
     @Test
+    @Order(3)
     @DisplayName("Проверка вкладки 'Картинки'")
     public void testImagesTab() {
         performSearch();
-
-        // Переход на вкладку "Картинки"
         switchToTab();
-
-        // Проверка изображений
         verifyImages();
     }
 
@@ -68,11 +66,10 @@ public class BaseTest {
      * Проверка основных элементов интерфейса
      */
     @Test
+    @Order(4)
     @DisplayName("Проверка основных элементов на странице результатов поиска")
     public void checkPageElements() {
         performSearch();
-
-        // Проверка основных элементов
         verifySearchButton();
         verifyNavigationBlock();
         verifySettingsMenu();
